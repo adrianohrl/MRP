@@ -6,7 +6,6 @@
 package inventory.mrp.tree;
 
 import inventory.GlobalInventoryItem;
-import inventory.util.Unit;
 import javax.persistence.Entity;
 
 /**
@@ -19,8 +18,8 @@ public class Product extends MRPTreeNode<ProductComponent> {
     public Product() {
     }
 
-    public Product(GlobalInventoryItem node, double leadTime, Unit timeUnit) {
-        super(node, leadTime, timeUnit, false);
+    public Product(GlobalInventoryItem node) {
+        super(node);
     }
 
     @Override

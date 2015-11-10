@@ -26,14 +26,20 @@ public abstract class ProductComponent<C extends ProductComponent> extends MRPTr
     public ProductComponent() {
     }
 
-    protected ProductComponent(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit, boolean leaf) {
-        super(node, null,leadTime, timeUnit, leaf);
+    /**
+     * Somente para a criação da árvore que será associada a um GlobalInventoryItem
+     * @param node
+     * @param requiredQuantity
+     * @param quantityUnit 
+     */
+    protected ProductComponent(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit) {
+        super(node);
         this.requiredQuantity = Math.abs(requiredQuantity);
         this.quantityUnit = quantityUnit;
     }
 
-    protected ProductComponent(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit, boolean leaf) {
-        super(node, parent,leadTime, timeUnit, leaf);
+    protected ProductComponent(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit, boolean leaf) {
+        super(node, parent, leaf);
         this.requiredQuantity = Math.abs(requiredQuantity);
         this.quantityUnit = quantityUnit;
     }

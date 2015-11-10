@@ -19,12 +19,18 @@ public class ProductItem extends ProductComponent {
     public ProductItem() {
     }
 
-    public ProductItem(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(node, null, requiredQuantity, quantityUnit, leadTime, timeUnit, true);
+    /**
+     * Usado em momentos que o parent ainda não foi instanciado, mas está prestes a ser instanciado
+     * @param node
+     * @param requiredQuantity
+     * @param quantityUnit 
+     */
+    public ProductItem(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit) {
+        super(node, null, requiredQuantity, quantityUnit, true);
     }
 
-    public ProductItem(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(node, parent, requiredQuantity, quantityUnit, leadTime, timeUnit, true);
+    public ProductItem(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit) {
+        super(node, parent, requiredQuantity, quantityUnit, true);
     }
     
 }

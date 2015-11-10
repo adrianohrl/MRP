@@ -5,7 +5,6 @@
  */
 package inventory.orders;
 
-import inventory.GlobalInventory;
 import inventory.GlobalInventoryItem;
 import inventory.InventoryItem;
 import inventory.SectorInventory;
@@ -79,32 +78,41 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
         order(item.getItem(), item.getQuantity(), item.getUnit());
     }
     
-    private void order(GlobalInventoryItem item, double quantity, Unit unit) {
+    private double order(GlobalInventoryItem item, double quantity, Unit unit) {
         double remainingQuantity = reserve(item, quantity, unit);
         MRPTreeNode node = item.getTreeNode();
         if (remainingQuantity == 0 || node == null || node.isLeaf()) {
-            return;
+            return remainingQuantity;
         }
         Iterator<ProductComponent> children = node.children();
         while (children.hasNext()) {
             ProductComponent child = children.next();
-            order(child.getNode(), remainingQuantity * child.getRequiredQuantity(), child.getQuantityUnit());
+            double childRemainingQuantity = order(child.getNode(), remainingQuantity * child.getRequiredQuantity(), child.getQuantityUnit());
+            double leadTime = child.getNode().getLeadTime();
+            MRPTreeNode parent = child.getParent();
+            while (parent != null) {
+                leadTime += parent.getNode().getLeadTime(child.getTimeUnit());
+                parent = parent.getParent();
+            }
             if (child.isLeaf()) {
-                double leadTime = child.getNode().getLeadTime();
-                MRPTreeNode parent = child.getParent();
-                while (parent != null) {
-                    leadTime += parent.getNode().getLeadTime(child.getTimeUnit());
-                    parent = parent.getParent();
-                }
-                System.out.println("Leaf lead time " + child.getNode().getReference() + ": " + leadTime + " [" + child.getTimeUnit() + "]");
+                System.out.println("It's necessary to do a purchase order of " + childRemainingQuantity + " [" + child.getQuantityUnit() + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
                 Calendar now = new GregorianCalendar();
                 Calendar deadline = new GregorianCalendar();
-                deadline.add(Calendar.HOUR, Math.round((float) leadTime));
+                deadline.add(Calendar.HOUR, Math.round((float) leadTime * 7 * 24));
                 PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), now, deadline, null, getSupplier()); /// qual é o deadline
-                purchaseOrder.addItem(new OrderItem(item, remainingQuantity, unit));
+                purchaseOrder.addItem(new OrderItem(item, childRemainingQuantity, child.getQuantityUnit()));
                 purchaseOrders.add(purchaseOrder);
+            } else if (remainingQuantity != 0) {
+                System.out.println("It's necessary to do a manufacturing order of " + childRemainingQuantity + " [" + unit + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
+                Calendar now = new GregorianCalendar();
+                Calendar deadline = new GregorianCalendar();
+                deadline.add(Calendar.HOUR, Math.round((float) leadTime * 7 * 24));
+                ManufacturingOrder manufacturingOrder = new ManufacturingOrder(getReference(), getInventory(), now, deadline, null, getSupplier()); /// qual é o deadline
+                manufacturingOrder.addItem(new OrderItem(item, childRemainingQuantity, unit));
+                manufacturingOrders.add(manufacturingOrder);
             }
         }
+        return remainingQuantity;
     }
     
     /**

@@ -44,21 +44,28 @@ public abstract class MRPTreeNode<C extends ProductComponent> implements Seriali
 
     public MRPTreeNode() {
     }
-
-    protected MRPTreeNode(GlobalInventoryItem node, double leadTime, Unit timeUnit, boolean leaf) {
+    
+    private MRPTreeNode(GlobalInventoryItem node, boolean leaf) {
         this.node = node;
-        this.leadTime = Math.abs(leadTime);
-        this.timeUnit = timeUnit;
+        this.leadTime = node.getLeadTime();
+        this.timeUnit = node.getTimeUnit();
         this.leaf = leaf;
         if (leaf) {
             children = null;
-        } else {
-            this.node.setTreeNode(this); ///////// tirar isso daki!!!!!! (só pode existir um)
         }
     }
 
-    protected MRPTreeNode(GlobalInventoryItem node, MRPTreeNode parent, double leadTime, Unit timeUnit, boolean leaf) {
-        this(node, leadTime, timeUnit, leaf);
+    /**
+     * Este construtor deve ser usado apenas quando está se criando o GlobalInventoryItem e quando leaf for false
+     * @param node
+     */
+    protected MRPTreeNode(GlobalInventoryItem node) {
+        this(node, false);
+        this.node.setTreeNode(this);
+    }
+
+    protected MRPTreeNode(GlobalInventoryItem node, MRPTreeNode parent, boolean leaf) {
+        this(node, leaf);
         this.parent = parent;
     }
     

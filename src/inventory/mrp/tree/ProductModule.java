@@ -19,21 +19,33 @@ public class ProductModule extends ProductComponent<ProductItem> { /// nesse cas
     public ProductModule() {
     }
 
-    public ProductModule(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(node, null, requiredQuantity, quantityUnit, leadTime, timeUnit, false);
+    /**
+     * Somente para a criação da árvore que será associada a um GlobalInventoryItem
+     * @param node
+     * @param requiredQuantity
+     * @param quantityUnit 
+     */
+    public ProductModule(GlobalInventoryItem node, double requiredQuantity, Unit quantityUnit) {
+        super(node, requiredQuantity, quantityUnit);
     }
 
-    public ProductModule(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(node, parent, requiredQuantity, quantityUnit, leadTime, timeUnit, false);
+    public ProductModule(GlobalInventoryItem node, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit) {
+        super(node, parent, requiredQuantity, quantityUnit, false);
     }
     
-    public ProductModule(ProductModule module, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(module.getNode(), null, requiredQuantity, quantityUnit, leadTime, timeUnit, false);
+    /**
+     * Somente para a criação da árvore que será associada a um GlobalInventoryItem
+     * @param module
+     * @param requiredQuantity
+     * @param quantityUnit 
+     */
+    public ProductModule(ProductModule module, double requiredQuantity, Unit quantityUnit) {
+        super(module.getNode(), requiredQuantity, quantityUnit);
         getChildren().addAll(module.getChildren());
     }
     
-    public ProductModule(ProductModule module, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit, double leadTime, Unit timeUnit) {
-        super(module.getNode(), parent, requiredQuantity, quantityUnit, leadTime, timeUnit, false);
+    public ProductModule(ProductModule module, MRPTreeNode parent, double requiredQuantity, Unit quantityUnit) {
+        super(module.getNode(), parent, requiredQuantity, quantityUnit, false);
         addChildren(module.getChildren());
     }
 

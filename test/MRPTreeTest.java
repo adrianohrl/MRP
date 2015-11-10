@@ -34,48 +34,50 @@ public class MRPTreeTest {
         
         /** Unidades utilizadas */
         Unit g = new Unit("g", "Gramas", true);
+        Unit kg = new Unit("kg", "Kilogramas", true);
         Unit h = new Unit("h", "Horas", true);
-        Unit uni = new Unit("uni", "Unidades", false);
+        Unit semanas = new Unit("sem", "Semanas", true);
+        Unit unidades = new Unit("un", "Unidades", false);
         Unit p = new Unit("%", "Porcentagem", true);
         
         /** MPs */
         List<GlobalInventoryItem> fios = new ArrayList<>();
-        fios.add(new GlobalInventoryItem("F1 (Azul)", 0, g, 12, h));
-        fios.add(new GlobalInventoryItem("F2 (Azul Marinho)", 0, g, 12, h));
-        fios.add(new GlobalInventoryItem("F3 (Azul Claro)", 0, g, 12, h));
-        fios.add(new GlobalInventoryItem("F4 (Ciano)", 0, g, 24, h));
-        GlobalInventoryItem ziper25 = new GlobalInventoryItem("Zíper Azul (25 cm)", 0, uni, 48, h);
+        fios.add(new GlobalInventoryItem("Linha 2/28 Branca", 0, g, 4, semanas));
+        fios.add(new GlobalInventoryItem("Linha 2/28 Azul", 0, g, 3, semanas));
+        fios.add(new GlobalInventoryItem("Linha 2/28 Azul Escura", 0, g, 2.5, semanas));
+        GlobalInventoryItem ziper25 = new GlobalInventoryItem("Zíper 25cm Azul", 0, unidades, 1.5, semanas);
+        GlobalInventoryItem micanga = new GlobalInventoryItem("Miçanga", 0, unidades, 2.5, semanas);
+        //GlobalInventoryItem ziper35 = new GlobalInventoryItem("Zíper Azul (35 cm)", 0, unidades, 2, semanas);
+        //GlobalInventoryItem ziper50 = new GlobalInventoryItem("Zíper Azul (50 cm)", 0, unidades, 2, semanas);
+        
         //ziper25.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.NOVEMBER, 20), 7, uni));
         //ziper25.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.DECEMBER, 2), 6, uni));
-        GlobalInventoryItem ziper35 = new GlobalInventoryItem("Zíper Azul (35 cm)", 0, uni, 0, h);
         //ziper35.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.DECEMBER, 5), 10, uni));
-        GlobalInventoryItem ziper50 = new GlobalInventoryItem("Zíper Azul (50 cm)", 0, uni, 0, h);
         //ziper50.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.OCTOBER, 15), 4, uni));
-        GlobalInventoryItem micanga = new GlobalInventoryItem("Micanga Perola", 0, uni, 72, h);
         //micanga.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.SEPTEMBER, 10), 500, uni));
         //micanga.addScheduledReceipt(new ScheduledReceipt(new GregorianCalendar(2015, Calendar.DECEMBER, 1), 500, uni));
         
         /** WIP */
-        GlobalInventoryItem blusa1Frente = new GlobalInventoryItem("Blusa 1 Frente", 0, p, 0, h);   
-        ProductModule frente1 = new ProductModule(blusa1Frente, 1.00, p, 0, h);
-        frente1.addChild(new ProductItem(fios.get(0), 100, g, 0, h));
-        frente1.addChild(new ProductItem(fios.get(1), 200, g, 0, h));
-        GlobalInventoryItem blusa1Costas = new GlobalInventoryItem("Blusa 1 Costas", 0, p, 0, h); 
-        ProductModule costas1 = new ProductModule(blusa1Costas, 1.00, p, 0, h);
-        costas1.addChild(new ProductItem(fios.get(0), 50, g, 0, h));
-        costas1.addChild(new ProductItem(fios.get(2), 250, g, 0, h));
-        GlobalInventoryItem blusa1Manga = new GlobalInventoryItem("Blusa 1 Manga", 0, p, 0, h); 
-        ProductModule manga1 = new ProductModule(blusa1Manga, 2.00, p, 0, h);
-        manga1.addChild(new ProductItem(fios.get(3), 150, g, 0, h));          
+        GlobalInventoryItem frente = new GlobalInventoryItem("Frente", 0, unidades, 4, semanas);   
+        ProductModule frenteTree = new ProductModule(frente, 1, unidades);
+        frenteTree.addChild(new ProductItem(fios.get(0), 250, g));
+        frenteTree.addChild(new ProductItem(fios.get(1), 250, g));
+        GlobalInventoryItem costas = new GlobalInventoryItem("Costas", 0, unidades, 2.5, semanas); 
+        ProductModule costasTree = new ProductModule(costas, 1, unidades);
+        costasTree.addChild(new ProductItem(fios.get(0), 250, g));
+        costasTree.addChild(new ProductItem(fios.get(2), 250, g));
+        GlobalInventoryItem manga = new GlobalInventoryItem("Manga", 0, unidades, 2, semanas); 
+        ProductModule mangaTree = new ProductModule(manga, 2, unidades);
+        mangaTree.addChild(new ProductItem(fios.get(0), 100, g));          
         
         /** PFs */
-        GlobalInventoryItem blusa1p = new GlobalInventoryItem("Blusa 1 (P)", 0, uni, 0, h);
-        Product blusa1pTree = new Product(blusa1p, 0, h);
-        blusa1pTree.addChild(frente1);
-        blusa1pTree.addChild(costas1);
-        blusa1pTree.addChild(manga1);
-        blusa1pTree.addChild(new ProductItem(micanga, 20, uni, 0, h));
-        blusa1pTree.addChild(new ProductItem(ziper25, 1, uni, 0, h));
+        GlobalInventoryItem blusaAzulP = new GlobalInventoryItem("Blusa Azul P", 0, unidades, 2, semanas);
+        Product blusa1pTree = new Product(blusaAzulP);
+        blusa1pTree.addChild(frenteTree);
+        blusa1pTree.addChild(costasTree);
+        blusa1pTree.addChild(mangaTree);
+        blusa1pTree.addChild(new ProductItem(micanga, 10, unidades));
+        blusa1pTree.addChild(new ProductItem(ziper25, 1, unidades));
         
         /*GlobalInventoryItem blusa1m = new GlobalInventoryItem("Blusa 1 (M)", 0, uni, 0, h);
         Product blusa1mTree = new Product(blusa1m, 0, h);
@@ -104,9 +106,9 @@ public class MRPTreeTest {
         
         Filial filial = new Filial("Cecília Prado - Fábrica de Jacutinga");
         GlobalInventory globalInventory = new GlobalInventory(filial);
-        globalInventory.addAllItems(fios); globalInventory.add(ziper25); globalInventory.add(ziper35); globalInventory.add(ziper50); globalInventory.add(micanga);
-        globalInventory.add(blusa1Frente); globalInventory.add(blusa1Costas); globalInventory.add(blusa1Manga);
-        globalInventory.add(blusa1p); //globalInventory.add(blusa1m); globalInventory.add(blusa1g);
+        globalInventory.addAllItems(fios); globalInventory.add(micanga); globalInventory.add(ziper25); //globalInventory.add(ziper35); globalInventory.add(ziper50); globalInventory.add(micanga);
+        globalInventory.add(frente); globalInventory.add(costas); globalInventory.add(manga);
+        globalInventory.add(blusaAzulP); //globalInventory.add(blusa1m); globalInventory.add(blusa1g);
         
         Supplier fiosAmparo = new Supplier("Fios Amparo");
         SectorInventory estoqueMP = new SectorInventory(globalInventory, new Sector("Estoque de Matéria Prima"));
@@ -120,16 +122,15 @@ public class MRPTreeTest {
         
         Responsible adrianohrl = new Responsible("Adriano Henrique Rossette Leite");
         Movement movement1 = new FromSupplierToSector(adrianohrl, fiosAmparo, estoqueMP, new GregorianCalendar());
-        movement1.add(new InventoryItem(fios.get(0), 50, 0, g));
-        movement1.add(new InventoryItem(fios.get(1), 20000, 0, g));
-        movement1.add(new InventoryItem(fios.get(2), 2000, 0, g));
-        movement1.add(new InventoryItem(fios.get(3), 350, 0, g));
-        movement1.add(new InventoryItem(micanga, 50, 0, uni));
-        movement1.add(new InventoryItem(ziper25, 4, 0, uni));
-        movement1.add(new InventoryItem(blusa1Frente, 3, 0, p));
-        movement1.add(new InventoryItem(blusa1Costas, 2, 0, p));
-        movement1.add(new InventoryItem(blusa1Manga, 4, 0, p));
-        movement1.add(new InventoryItem(blusa1p, 5, 0, p));
+        movement1.add(new InventoryItem(blusaAzulP, 10, 0, unidades));
+        movement1.add(new InventoryItem(frente, 20, 0, unidades));
+        movement1.add(new InventoryItem(ziper25, 30, 0, unidades));
+        movement1.add(new InventoryItem(manga, 35, 0, unidades));
+        movement1.add(new InventoryItem(micanga, 75, 0, unidades));
+        movement1.add(new InventoryItem(costas, 15, 0, unidades));
+        movement1.add(new InventoryItem(fios.get(0), 15e3, 0, g));
+        movement1.add(new InventoryItem(fios.get(1), 5e3, 0, g));
+        movement1.add(new InventoryItem(fios.get(2), 2e3, 0, g));
         if (movement1.move()) {
             globalInventory.add(movement1);
         } else {
@@ -140,7 +141,7 @@ public class MRPTreeTest {
         System.out.println(globalInventory);
         
         SaleOrder saleOrder = new SaleOrder("Fest Malhas 2015", estoqueMP, new GregorianCalendar(), new GregorianCalendar(2016, Calendar.JANUARY, 1), estoqueMP.getAgent(), renner.getAgent());
-        saleOrder.getItems().add(new OrderItem(blusa1p, 30, uni));
+        saleOrder.getItems().add(new OrderItem(blusaAzulP, 100, unidades));
         saleOrder.order();
         System.out.println("---------------- Purchase Orders ------------------");
         List<PurchaseOrder> purchaseOrders = saleOrder.getPurchaseOrders();
