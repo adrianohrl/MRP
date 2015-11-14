@@ -12,6 +12,7 @@ import inventory.agents.Client;
 import inventory.agents.Sector;
 import inventory.mrp.tree.MRPTreeNode;
 import inventory.mrp.tree.ProductComponent;
+import inventory.util.CalendarManipulator;
 import inventory.util.Unit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -97,16 +98,14 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
             if (child.isLeaf()) {
                 System.out.println("It's necessary to do a purchase order of " + childRemainingQuantity + " [" + child.getQuantityUnit() + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
                 Calendar now = new GregorianCalendar();
-                Calendar deadline = new GregorianCalendar();
-                deadline.add(Calendar.HOUR, Math.round((float) leadTime * 7 * 24));
-                PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), now, deadline, null, getSupplier()); /// qual é o deadline
+                Calendar deadline = CalendarManipulator.add(new GregorianCalendar(), leadTime, child.getTimeUnit());
+                PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), now, deadline, null, getSupplier());
                 purchaseOrder.addItem(new OrderItem(item, childRemainingQuantity, child.getQuantityUnit()));
                 purchaseOrders.add(purchaseOrder);
             } else if (remainingQuantity != 0) {
                 System.out.println("It's necessary to do a manufacturing order of " + childRemainingQuantity + " [" + unit + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
                 Calendar now = new GregorianCalendar();
-                Calendar deadline = new GregorianCalendar();
-                deadline.add(Calendar.HOUR, Math.round((float) leadTime * 7 * 24));
+                Calendar deadline = CalendarManipulator.add(new GregorianCalendar(), leadTime, child.getTimeUnit());
                 ManufacturingOrder manufacturingOrder = new ManufacturingOrder(getReference(), getInventory(), now, deadline, null, getSupplier()); /// qual é o deadline
                 manufacturingOrder.addItem(new OrderItem(item, childRemainingQuantity, unit));
                 manufacturingOrders.add(manufacturingOrder);
