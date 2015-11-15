@@ -8,6 +8,7 @@ package inventory.orders;
 import inventory.GlobalInventoryItem;
 import inventory.SectorInventory;
 import inventory.agents.Agent;
+import inventory.util.CalendarManipulator;
 import inventory.util.Unit;
 import inventory.util.UnitConverter;
 import java.io.Serializable;
@@ -78,7 +79,7 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         if (!item.isValid()) {
             return false;
         }
-        addItem(item);
+        add(item);
         return true;
     }
     
@@ -86,7 +87,7 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         if (!delivery.isValid()) {
             return false;
         }
-        addDelivery(delivery);
+        add(delivery);
         return true;
     }
     
@@ -94,7 +95,7 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         if (!devolution.isValid()) {
             return false;
         }
-        addDevolution(devolution);
+        add(devolution);
         return true;
     }
     
@@ -102,26 +103,26 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         if (!cancellation.isValid()) {
             return false;
         }
-        addCancellation(cancellation);
+        add(cancellation);
         return true;
     }
     
     public double getItemDeliveredQuantity(GlobalInventoryItem item, Unit unit) {
-        return AbstractOrder.this.getItemDeliveredQuantity(new OrderItem(item, 0, unit));
+        return getItemDeliveredQuantity(new OrderItem(item, 0, unit));
     }
     
     public double getItemDeliveredQuantity(OrderItem item) {
         double quantity = 0;
         for (Delivery delivery : deliveries) {
             if (delivery.contains(item)) {
-                OrderItem i = delivery.getItem(item);
+                OrderItem i = delivery.get(item);
                 UnitConverter converter = new UnitConverter(i.getUnit(), item.getUnit());
                 quantity += converter.convert(i.getQuantity());
             }
         }
         for (Devolution devolution : devolutions) {
             if (devolution.contains(item)) {
-                OrderItem i = devolution.getItem(item);
+                OrderItem i = devolution.get(item);
                 UnitConverter converter = new UnitConverter(i.getUnit(), item.getUnit());
                 quantity -= converter.convert(i.getQuantity());
             }
@@ -129,11 +130,20 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         return quantity;
     }
     
-    protected void addItem(GlobalInventoryItem item, double quantity, Unit unit) {
-        addItem(new OrderItem(item, quantity, unit));
+    protected OrderItem get(OrderItem item) {
+        for (OrderItem i : items) {
+            if (i.equals(item)) {
+                return i;
+            }
+        }
+        return null;
     }
     
-    protected void addItem(OrderItem item) {
+    protected void add(GlobalInventoryItem item, double quantity, Unit unit) {
+        add(new OrderItem(item, quantity, unit));
+    }
+    
+    protected void add(OrderItem item) {
         if (contains(item)) {
             for (OrderItem i : items) {
                 if (i.equals(item)) {
@@ -147,7 +157,7 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         }
     }
     
-    protected void addDelivery(Delivery delivery) {
+    protected void add(Delivery delivery) {
         deliveries.add(delivery);
         for (OrderItem deliveryItem : delivery.getItems()) {
             for (OrderItem item : items) {
@@ -161,7 +171,7 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         deliveryPercentage += delivery.getPercentage();
     }
     
-    protected void addDevolution(Devolution devolution) {
+    protected void add(Devolution devolution) {
         devolutions.add(devolution);
         for (OrderItem devolutionItem : devolution.getItems()) {
             for (OrderItem item : items) {
@@ -174,21 +184,60 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         deliveryPercentage -= devolution.getPercentage();
     }
     
-    protected void addCancellation(Cancellation cancellation) {
+    protected void add(Cancellation cancellation) {
         cancellations.add(cancellation);
         for (OrderItem cancellationItem : cancellation.getItems()) {
-            for (OrderItem item : items) {
+            for (int i = size() - 1; i >= 0; i--) {
+                OrderItem item = items.get(i);
                 if (item.equals(cancellationItem)) {
                    item.cancel(cancellation, cancellationItem);
+                   if (!item.isValid()) {
+                       items.remove(i);
+                   }
                 }
             }
         }
-        cancellation.setPercentage(cancellation.getPercentage() / size());
+        if (!isEmpty()) {
+            cancellation.setPercentage(cancellation.getPercentage() / size());
+        } else {
+            cancellation.setPercentage(1);
+        }
         if (cancellation.getPercentage() != 1) {
             deliveryPercentage /= (1 - cancellation.getPercentage());
-        } else {
+        } else if (deliveryPercentage != 0) {
             deliveryPercentage = 1;
+        } else {
+            deliveryPercentage = 0;
         }
+    }
+    
+    protected void realocate(AbstractOrder destination, OrderItem item) {
+        OrderItem orderItem = get(item);
+        if (orderItem == null) {
+            return;
+        }
+        UnitConverter converter = new UnitConverter(orderItem.getUnit(), item.getUnit());
+        double undeliveredQuantity = converter.convert(orderItem.getQuantity()) - getItemDeliveredQuantity(item);
+        if (undeliveredQuantity <= 0) {
+            return;
+        }
+        destination.add(new OrderItem(orderItem.getItem(), undeliveredQuantity, item.getUnit()));
+        Cancellation cancellation = new Cancellation("Realocating to another order!!!");
+        cancellation.add(item);
+        cancel(cancellation);
+        cancellations.remove(cancellation);
+    }
+    
+    public boolean isEmpty() {
+        if (items.isEmpty()) {
+            return true;
+        }
+        for (OrderItem item : items) {
+            if (item.isValid()) {
+                return false;
+            }
+        }
+        return true;
     }
     
     public int size() {
@@ -207,6 +256,8 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
     public String toString() {
         DecimalFormat formatter = new DecimalFormat("0.00");
         String str = "Order " + reference + ":";
+        str += "\nOrdered on: " + CalendarManipulator.formatHourAndDate(orderDate);
+        str += "\nDeadline: " + CalendarManipulator.formatHourAndDate(deadline);
         for (OrderItem item : items) {
             str += "\n\tItem " + item + ": Delivered " + getItemDeliveredQuantity(item) + " [" + item.getUnit() + "] of " + item.getQuantity() + " [" + item.getUnit() + "] (" + formatter.format(100 * item.getDeliveryPercentage()) + " %)";
         }

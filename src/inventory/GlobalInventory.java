@@ -48,23 +48,6 @@ public class GlobalInventory implements Serializable {
         this.filial = filial;
     }
     
-    /*public void update() {
-        for (GlobalInventoryItem item : items) {
-            double itemQuantityOnHand = 0;
-            double itemBoundQuantity = 0;
-            for (Inventory inventory : inventories) {   
-                InventoryItem inventoryItem = inventory.get(item);
-                if (inventoryItem == null || inventoryItem.getQuantityOnHand() < 0 || inventoryItem.getBoundQuantity() < 0) {
-                    throw new RuntimeException(filial + " Global Inventory has been corrupted!!!");
-                }
-                itemQuantityOnHand += inventoryItem.getQuantityOnHand(item.getQuantityUnit());
-                itemBoundQuantity += inventoryItem.getBoundQuantity(item.getQuantityUnit());
-            }
-            item.setQuantityOnHand(itemQuantityOnHand);
-            item.setBoundQuantity(itemBoundQuantity);
-        }
-    }*/
-    
     public boolean contains(GlobalInventoryItem item) {
         return items.contains(item);
     }
@@ -85,7 +68,6 @@ public class GlobalInventory implements Serializable {
             inventory.add(new InventoryItem(item));
         }
         items.add(item);
-        //update();
     }
     
     public void add(Inventory inventory) {
@@ -96,17 +78,14 @@ public class GlobalInventory implements Serializable {
             inventory.add(new InventoryItem(item));
         }
         inventories.add(inventory);
-        //update();
     }
     
     public void add(AbstractOrder order) {
         orders.add(order);
-        //update();
     }
     
     public void add(Movement movement) {
         movements.add(movement);
-        //update();
     }
     
     public void addAllItems(List<GlobalInventoryItem> items) {

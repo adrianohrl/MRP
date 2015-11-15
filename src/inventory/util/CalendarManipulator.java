@@ -7,6 +7,7 @@ package inventory.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  *
@@ -18,45 +19,36 @@ public class CalendarManipulator {
         if (!temporalUnit.measuresTime()) {
             throw new CalendarManipulationException("Unit must be a temporal unit!!!");
         }
+        calendar = CalendarManipulator.clone(calendar);
         UnitConverter converter;
+        int integerPart = (int) Math.floor(quantity);
         if (temporalUnit.equals("s")) {
             calendar.add(Calendar.SECOND, (int) Math.round(quantity));
+            return calendar;
         } else if (temporalUnit.equals("min")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.MINUTE, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("min", "s");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("h")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.HOUR, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("h", "min");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("dia")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.DAY_OF_MONTH, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("dia", "h");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("sem")) {
             converter = new UnitConverter("sem", "dia");
-            CalendarManipulator.add(calendar, converter.convert(quantity), converter.getTo());
+            calendar.add(Calendar.DAY_OF_MONTH, 7 * integerPart);
         } else if (temporalUnit.equals("mes")) {
-            int integerPart = (int) Math.floor(quantity);
-            calendar.add(Calendar.MONTH, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("mes", "dia");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("ano")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.YEAR, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("ano", "mes");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else {
             throw new CalendarManipulationException("Unknown temporal unit!!!");
         } 
+        double fraction = quantity - integerPart;
+        if (fraction != 0) {
+            return CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
+        }
         return calendar;
     }
     
@@ -64,47 +56,53 @@ public class CalendarManipulator {
         if (!temporalUnit.measuresTime()) {
             throw new CalendarManipulationException("Unit must be a temporal unit!!!");
         }
-        UnitConverter converter;
+        calendar = CalendarManipulator.clone(calendar);
+        UnitConverter converter = null;
         quantity = -quantity;
+        int integerPart = (int) Math.floor(quantity);
         if (temporalUnit.equals("s")) {
             calendar.add(Calendar.SECOND, (int) Math.round(quantity));
+            return calendar;
         } else if (temporalUnit.equals("min")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.MINUTE, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("min", "s");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("h")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.HOUR, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("h", "min");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("dia")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.DAY_OF_MONTH, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("dia", "h");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("sem")) {
             converter = new UnitConverter("sem", "dia");
-            CalendarManipulator.add(calendar, converter.convert(quantity), converter.getTo());
+            calendar.add(Calendar.DAY_OF_MONTH, 7 * integerPart);
         } else if (temporalUnit.equals("mes")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.MONTH, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("mes", "dia");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else if (temporalUnit.equals("ano")) {
-            int integerPart = (int) Math.floor(quantity);
             calendar.add(Calendar.YEAR, integerPart);
-            double fraction = quantity - integerPart;
             converter = new UnitConverter("ano", "mes");
-            CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
         } else {
             throw new CalendarManipulationException("Unknown temporal unit!!!");
         } 
+        double fraction = quantity - integerPart;
+        if (fraction != 0) {
+            return CalendarManipulator.add(calendar, converter.convert(fraction), converter.getTo());
+        }
         return calendar;
+    }
+    
+    public static boolean happenOnTheSameDay(Calendar date1, Calendar date2) {
+        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) && 
+                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) && 
+                date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);
+    }
+    
+    public static Calendar getDate(Calendar calendar) {
+        return new GregorianCalendar(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+    }
+    
+    public static Calendar today() {
+        return CalendarManipulator.getDate(new GregorianCalendar());
     }
     
     public static String formatAll(Calendar calendar) {
@@ -129,6 +127,10 @@ public class CalendarManipulator {
     
     private static String format(Calendar calendar, SimpleDateFormat formatter) {
         return formatter.format(calendar.getTime());
+    }
+    
+    private static Calendar clone(Calendar calendar) {
+        return (Calendar) calendar.clone();
     }
     
 }

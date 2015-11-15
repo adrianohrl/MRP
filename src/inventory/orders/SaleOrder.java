@@ -46,32 +46,17 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
     
     // quando realizada uma nova entrega de fabricaćão, verificar se pode ser feita uma nova entrega do pedido de venda
     // ou se pode ser gerada uma nova ordem de fabricaćão
-    
-        // (sempre tentando respeitar o prazo) 
-        
-        // tentar colocar os passos 1 e 2 dentro do while tbm
-        // utilizar recursividade
-        
-        // 1) verificar quais PF já estão disponíveis para entrega
-        // 2) se sim, reservá-lo para esta ordem
-        // 3) se não foi concluído a ordem ainda, verificar se todos os módulos e itens (children) para fabricaćão deste nó já estão disponíveis
-        // 4) se sim, reservá-los para esta ordem e gerar ordem de fabricaćão deste elemento (PF ou WIP)
-        // 5) se não, reservar itens 
-        // 6) se ainda existe item indisponível, gerar ordem de compra para os itens em falta (dentro do prazo)
-        // 7) se ainda existe módulo insdisponível, repetir passos a partir de 3)
-        
-        // 8) quando chegar na folha, voltar agentando ordens de compra e fabricaćão de acordo com o prazo final e com os tempos de espera
         
     @Override
     public void order() {
         for (OrderItem item : getItems()) {
             order(item);
         }
-        for (PurchaseOrder purchaseOrder : purchaseOrders) { /////////agrupar ordens de compra de 5 em 5 dias
-            ///// tbm agrupar itens de mesma referencia (prevalecendo a data mais antiga dos itens)
+        for (PurchaseOrder purchaseOrder : purchaseOrders) {
+            purchaseOrder.order();
         }
-        for (ManufacturingOrder manufacturingOrder : manufacturingOrders) { /// agrupar ordens de fabricaćão por dia 
-            
+        for (ManufacturingOrder manufacturingOrder : manufacturingOrders) {
+            manufacturingOrder.order();
         }
     }
     
@@ -96,32 +81,20 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
                 parent = parent.getParent();
             }
             if (child.isLeaf()) {
-                System.out.println("It's necessary to do a purchase order of " + childRemainingQuantity + " [" + child.getQuantityUnit() + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
-                Calendar now = new GregorianCalendar();
-                Calendar deadline = CalendarManipulator.add(new GregorianCalendar(), leadTime, child.getTimeUnit());
-                PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), now, deadline, null, getSupplier());
-                purchaseOrder.addItem(new OrderItem(item, childRemainingQuantity, child.getQuantityUnit()));
-                purchaseOrders.add(purchaseOrder);
+                Calendar deadline = CalendarManipulator.subtract(getDeadline(), leadTime, child.getTimeUnit());
+                PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
+                purchaseOrder.add(new OrderItem(child.getNode(), childRemainingQuantity, child.getQuantityUnit()));
+                add(purchaseOrder);
             } else if (remainingQuantity != 0) {
-                System.out.println("It's necessary to do a manufacturing order of " + childRemainingQuantity + " [" + unit + "] of " + child.getNode().getReference() + " at least " + leadTime + " [" + child.getTimeUnit() + "] before the deadline!!!");
-                Calendar now = new GregorianCalendar();
-                Calendar deadline = CalendarManipulator.add(new GregorianCalendar(), leadTime, child.getTimeUnit());
-                ManufacturingOrder manufacturingOrder = new ManufacturingOrder(getReference(), getInventory(), now, deadline, null, getSupplier()); /// qual é o deadline
-                manufacturingOrder.addItem(new OrderItem(item, childRemainingQuantity, unit));
-                manufacturingOrders.add(manufacturingOrder);
+                Calendar deadline = CalendarManipulator.subtract(getDeadline(), leadTime, child.getTimeUnit());
+                ManufacturingOrder manufacturingOrder = new ManufacturingOrder(getReference(), getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
+                manufacturingOrder.add(new OrderItem(child.getNode(), childRemainingQuantity, unit));
+                add(manufacturingOrder);
             }
         }
         return remainingQuantity;
     }
     
-    /**
-     * 
-     * @param inventory
-     * @param item
-     * @param desiredQuantity
-     * @param unit
-     * @return the remaining quantity
-     */
     private double reserve(GlobalInventoryItem item, double desiredQuantity, Unit unit) {
         SectorInventory inventory = getInventory();
         double availableQuantity = inventory.get(item).getQuantityOnHand(unit);
@@ -130,6 +103,84 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
             throw new RuntimeException("Unable to reserve " + quantity + " [" + unit + "] of " + item + " in " + inventory.getAgent());
         }
         return desiredQuantity - quantity;
+    }
+    
+    private void add(PurchaseOrder order) {
+        for (int i = order.size() - 1; i >= 0; i--) {
+            OrderItem item = order.getItems().get(i);
+            GlobalInventoryItem globalItem = item.getItem();
+            Calendar calendar = CalendarManipulator.subtract(order.getDeadline(), globalItem.getLeadTime(), globalItem.getTimeUnit());
+            for (PurchaseOrder purchaseOrder : purchaseOrders) {
+                Calendar purchaseDeadline = purchaseOrder.getDeadline();
+                if (calendar.before(purchaseDeadline) && purchaseOrder.contains(item)) {
+                    Cancellation cancellation = new Cancellation("Allocating this item to another order.");
+                    cancellation.add(item);
+                    if (purchaseDeadline.before(order.getDeadline())) {
+                        order.realocate(purchaseOrder, item);
+                    } else {
+                        purchaseOrder.realocate(order, item);
+                        if (purchaseOrder.isEmpty()) {
+                            purchaseOrders.remove(purchaseOrder);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        if (order.isEmpty()) {
+            return;
+        }
+        for (PurchaseOrder purchaseOrder : purchaseOrders) {
+            if (CalendarManipulator.happenOnTheSameDay(order.getDeadline(), purchaseOrder.getDeadline())) {
+                for (OrderItem item : order.getItems()) {
+                    if (item.isValid()) {
+                        purchaseOrder.add(item);
+                    }
+                }
+                return;
+            }
+        }
+        if (!order.isEmpty()) {
+            purchaseOrders.add(order);
+        }
+    }
+    
+    private void add(ManufacturingOrder order) {
+        for (int i = order.size() - 1; i >= 0; i--) {
+            OrderItem item = order.getItems().get(i);
+            GlobalInventoryItem globalItem = item.getItem();
+            Calendar calendar = CalendarManipulator.subtract(order.getDeadline(), globalItem.getLeadTime(), globalItem.getTimeUnit());
+            for (ManufacturingOrder manufacturingOrder : manufacturingOrders) {
+                Calendar manufacturingDeadline = manufacturingOrder.getDeadline();
+                if (calendar.before(manufacturingDeadline) && manufacturingOrder.contains(item)) {
+                    if (manufacturingDeadline.before(order.getDeadline())) {
+                        order.realocate(manufacturingOrder, item);
+                    } else {
+                        manufacturingOrder.realocate(order, item);
+                        if (manufacturingOrder.isEmpty()) {
+                            manufacturingOrders.remove(manufacturingOrder);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        if (order.isEmpty()) {
+            return;
+        }
+        for (ManufacturingOrder manufacturingOrder : manufacturingOrders) {
+            if (CalendarManipulator.happenOnTheSameDay(order.getDeadline(), manufacturingOrder.getDeadline())) {
+                for (OrderItem item : order.getItems()) {
+                    if (item.isValid()) {
+                        manufacturingOrder.add(item);
+                    }
+                }
+                return;
+            }
+        }
+        if (!order.isEmpty()) {
+            manufacturingOrders.add(order);
+        }
     }
 
     public List<PurchaseOrder> getPurchaseOrders() {

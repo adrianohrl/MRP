@@ -81,11 +81,13 @@ public class OrderItem implements Serializable {
         if (quantity > 0) {
             UnitConverter converter = new UnitConverter(unit, this.unit);
             float percentage = (float) (converter.convert(quantity) / this.quantity);
-            cancellation.setPercentage(cancellation.getPercentage() - percentage);
+            cancellation.setPercentage(cancellation.getPercentage() + percentage);
             if (percentage != 1) {
                 deliveryPercentage /= (1 - percentage);
-            } else {
+            } else if (deliveryPercentage != 0) {
                 deliveryPercentage = 1;
+            } else {
+                deliveryPercentage = 0;
             }
             this.quantity -= quantity;            
         }

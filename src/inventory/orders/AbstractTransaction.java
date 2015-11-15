@@ -54,11 +54,11 @@ public abstract class AbstractTransaction implements Serializable {
         if (!item.isValid()) {
             return false;
         }
-        addItem(item);
+        add(item);
         return true;
     }
     
-    public OrderItem getItem(OrderItem item) {
+    public OrderItem get(OrderItem item) {
         for (OrderItem i : items) {
             if (i.equals(item)) {
                 return i;
@@ -67,7 +67,7 @@ public abstract class AbstractTransaction implements Serializable {
         return null;
     }
     
-    public OrderItem getItem(GlobalInventoryItem item) {
+    public OrderItem get(GlobalInventoryItem item) {
         for (OrderItem i : items) {
             if (item.equals(i.getItem())) {
                 return i;
@@ -80,11 +80,11 @@ public abstract class AbstractTransaction implements Serializable {
         return items.size();
     }
     
-    protected void addItem(GlobalInventoryItem item, double quantity, Unit unit) {
+    protected void add(GlobalInventoryItem item, double quantity, Unit unit) {
         items.add(new OrderItem(item, quantity, unit));
     }
     
-    protected void addItem(OrderItem item) {
+    protected void add(OrderItem item) {
         items.add(item);
     }
     
