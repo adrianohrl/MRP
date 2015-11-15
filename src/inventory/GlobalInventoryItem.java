@@ -24,7 +24,7 @@ import javax.persistence.OneToOne;
 @Entity
 public class GlobalInventoryItem implements Serializable {
     
-     @Id
+    @Id
     private String reference;
     private double quantityOnHand = 0;
     private double boundQuantity = 0;
@@ -88,11 +88,14 @@ public class GlobalInventoryItem implements Serializable {
         return true;
     }
     
-    public void addGrossRequirement(GrossRequirement grossRequirement) {
+    public void add(GrossRequirement grossRequirement) {
+        if (grossRequirement.getQuantity() <= 0) {
+            return;
+        }
         double previousNetRequirement = getNetRequirement();
         grossRequirements.add(grossRequirement);
         double currentNetRequirement = getNetRequirement();
-        if (treeNode.isLeaf() || getNetRequirement() == 0) {
+        if (treeNode == null || treeNode.isLeaf() || getNetRequirement() == 0) {
             return;
         }
         Iterator<ProductComponent> children = treeNode.children();
@@ -100,7 +103,7 @@ public class GlobalInventoryItem implements Serializable {
             ProductComponent child = children.next();
             GlobalInventoryItem item = child.getNode();
             GrossRequirement childGrossRequirement = new GrossRequirement(grossRequirement.getOrder(), (currentNetRequirement - previousNetRequirement) * child.getRequiredQuantity(), child.getQuantityUnit());
-            item.addGrossRequirement(childGrossRequirement);
+            item.add(childGrossRequirement);
         }
     }
     
@@ -120,18 +123,20 @@ public class GlobalInventoryItem implements Serializable {
     
     public void update() {
         Calendar now = new GregorianCalendar();
-        for (int i = 0; i < scheduledReceipts.size(); i++) {
+        for (int i = scheduledReceipts.size() - 1; i >= 0; i--) {
             ScheduledReceipt scheduledReceipt = scheduledReceipts.get(i);
             if (now.after(scheduledReceipt.getReceiptDate())) {
                 UnitConverter converter = new UnitConverter(scheduledReceipt.getUnit(), quantityUnit);
                 quantityOnHand += converter.convert(scheduledReceipt.getQuantity());
                 scheduledReceipts.remove(i);
-                i--;
             }
         }
     }
     
-    public void addScheduledReceipt(ScheduledReceipt scheduledReceipt) {
+    public void add(ScheduledReceipt scheduledReceipt) {
+        if (scheduledReceipt.getQuantity() <= 0) {
+            return;
+        }
         scheduledReceipts.add(scheduledReceipt);
         update();
     }
@@ -185,7 +190,7 @@ public class GlobalInventoryItem implements Serializable {
     }
     
     public double getNetRequirement(Unit unit) {
-        double netRequirement = getTotalGrossRequirement(unit) - getTotalScheduledReceipt(unit) - getQuantityOnHand(unit) - getSafetyQuantity(unit);
+        double netRequirement = getTotalGrossRequirement(unit) - getTotalScheduledReceipt(unit) - getQuantityOnHand(unit) - getBoundQuantity(unit) - getSafetyQuantity(unit);
         if (netRequirement < 0) {
             netRequirement = 0;
         }

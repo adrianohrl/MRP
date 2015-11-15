@@ -1,23 +1,9 @@
 
-import inventory.ClientInventory;
-import inventory.GlobalInventory;
-import inventory.GlobalInventoryItem;
-import inventory.InventoryItem;
-import inventory.SectorInventory;
-import inventory.agents.Client;
-import inventory.agents.Filial;
-import inventory.agents.Responsible;
-import inventory.agents.Sector;
-import inventory.agents.Supplier;
-import inventory.movements.FromSupplierToSector;
-import inventory.movements.Movement;
-import inventory.mrp.tree.Product;
-import inventory.mrp.tree.ProductItem;
-import inventory.mrp.tree.ProductModule;
-import inventory.orders.ManufacturingOrder;
-import inventory.orders.OrderItem;
-import inventory.orders.PurchaseOrder;
-import inventory.orders.SaleOrder;
+import inventory.*;
+import inventory.agents.*;
+import inventory.movements.*;
+import inventory.mrp.tree.*;
+import inventory.orders.*;
 import inventory.util.Unit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -140,20 +126,20 @@ public class MRPTreeTest {
         System.out.println("\n----------- Starting Filial Inventory ----------");
         System.out.println(globalInventory);
         
-        SaleOrder saleOrder = new SaleOrder("Fest Malhas 2015", estoqueMP, new GregorianCalendar(), new GregorianCalendar(2016, Calendar.JANUARY, 1), estoqueMP.getAgent(), renner.getAgent());
+        SaleOrder saleOrder = new SaleOrder("Fest Malhas 2015", estoqueMP, new GregorianCalendar(), new GregorianCalendar(2016, Calendar.MAY, 1), estoqueMP.getAgent(), renner.getAgent());
         saleOrder.getItems().add(new OrderItem(blusaAzulP, 100, unidades));
         saleOrder.order();
         System.out.println("---------------- Purchase Orders ------------------");
         List<PurchaseOrder> purchaseOrders = saleOrder.getPurchaseOrders();
         for (PurchaseOrder purchaseOrder : purchaseOrders) {
             System.out.println(purchaseOrder);
-            globalInventory.add(purchaseOrder);
+           // globalInventory.add(purchaseOrder);
         }
         System.out.println("---------------- Manufacturing Orders ------------------");
         List<ManufacturingOrder> manufacturingOrders =  saleOrder.getManufacturingOrders();
         for (ManufacturingOrder manufacturingOrder : manufacturingOrders) {
             System.out.println(manufacturingOrder);
-            globalInventory.add(manufacturingOrder);
+         //   globalInventory.add(manufacturingOrder);
         }
         
         

@@ -8,6 +8,8 @@ package inventory;
 import inventory.agents.Agent;
 import inventory.orders.OrderItem;
 import inventory.mrp.tree.ProductComponent;
+import inventory.orders.AbstractOrder;
+import inventory.orders.ManufacturingOrder;
 import inventory.util.Unit;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,6 +48,18 @@ public abstract class Inventory<A extends Agent> implements Serializable {
         this.globalInventory = globalInventory;
         this.agent = agent;
     }   
+    
+    public void add(GrossRequirement grossRequirement, GlobalInventoryItem item) {
+        globalInventory.add(grossRequirement, item);
+    }
+    
+    public void add(ScheduledReceipt scheduledReceipt, GlobalInventoryItem item) {
+        globalInventory.add(scheduledReceipt, item);
+    }
+    
+    public void add(AbstractOrder order) {
+        globalInventory.add(order);
+    }
     
     public boolean unbound(List<InventoryItem> items) {
         if (!isValidUnbounds(items)) {

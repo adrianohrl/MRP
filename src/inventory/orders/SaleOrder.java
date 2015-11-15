@@ -6,6 +6,7 @@
 package inventory.orders;
 
 import inventory.GlobalInventoryItem;
+import inventory.GrossRequirement;
 import inventory.InventoryItem;
 import inventory.SectorInventory;
 import inventory.agents.Client;
@@ -52,6 +53,7 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
         for (OrderItem item : getItems()) {
             order(item);
         }
+        getInventory().add(this);
         for (PurchaseOrder purchaseOrder : purchaseOrders) {
             purchaseOrder.order();
         }
@@ -61,6 +63,8 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
     }
     
     private void order(OrderItem item) {
+        GrossRequirement grossRequirement = new GrossRequirement(this, item.getQuantity(), item.getUnit());
+        getInventory().add(grossRequirement, item.getItem());
         order(item.getItem(), item.getQuantity(), item.getUnit());
     }
     

@@ -8,6 +8,8 @@ package inventory;
 import inventory.agents.Filial;
 import inventory.orders.AbstractOrder;
 import inventory.movements.Movement;
+import inventory.orders.OrderItem;
+import inventory.util.Unit;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,22 @@ public class GlobalInventory implements Serializable {
         return items.size();
     }
     
+    public void add(GrossRequirement grossRequirement, GlobalInventoryItem item) {
+        for (GlobalInventoryItem globalItem : items) {
+            if (globalItem.equals(item)) {
+                globalItem.add(grossRequirement);
+            }
+        }
+    }
+    
+    public void add(ScheduledReceipt scheduledReceipt, GlobalInventoryItem item) {
+        for (GlobalInventoryItem globalItem : items) {
+            if (globalItem.equals(item)) {
+                globalItem.add(scheduledReceipt);
+            }
+        }
+    }
+    
     public void add(GlobalInventoryItem item) {
         if (contains(item)) {
             return;
@@ -81,6 +99,11 @@ public class GlobalInventory implements Serializable {
     }
     
     public void add(AbstractOrder order) {
+        List<OrderItem> orderItems = order.getItems();
+        for (OrderItem item : orderItems) {
+            ScheduledReceipt scheduledReceipt = new ScheduledReceipt(order.getDeadline(), item.getQuantity(), item.getUnit());
+            add(scheduledReceipt, item.getItem());
+        }
         orders.add(order);
     }
     
@@ -143,7 +166,7 @@ public class GlobalInventory implements Serializable {
         }
         str += "\n\tOrders: (" + orders.size() + ")";
         for (AbstractOrder order : orders) {
-            str += "\n\t\t" + order.getReference();
+            str += "\n\t\t" + order.getReference() + " (" + order.getClass().getSimpleName() + ")";
         }
         str += "\n\tMovements: (" + movements.size() + ")";
         for (Movement movement : movements) {

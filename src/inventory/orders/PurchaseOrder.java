@@ -29,8 +29,7 @@ public class PurchaseOrder extends AbstractOrder<Supplier, Sector> {
 
     @Override
     public void order() {
-        
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        getInventory().add(this);
     }
     
 }

@@ -112,6 +112,7 @@ public class OrderItem implements Serializable {
     public boolean isDeliveried() {
         return deliveryPercentage >= 1;
     }
+    
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj instanceof OrderItem && equals((OrderItem) obj);
