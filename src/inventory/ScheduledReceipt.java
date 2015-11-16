@@ -5,6 +5,7 @@
  */
 package inventory;
 
+import dao.Codeable;
 import inventory.util.Unit;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -22,7 +23,7 @@ import javax.persistence.TemporalType;
  * @author adrianohrl
  */
 @Entity
-public class ScheduledReceipt implements Serializable {
+public class ScheduledReceipt implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,10 +43,12 @@ public class ScheduledReceipt implements Serializable {
         this.unit = unit;
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

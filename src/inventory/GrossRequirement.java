@@ -5,8 +5,11 @@
  */
 package inventory;
 
+import dao.Codeable;
 import inventory.orders.AbstractOrder;
 import inventory.util.Unit;
+import java.io.Serializable;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,7 +19,8 @@ import javax.persistence.ManyToOne;
  *
  * @author adrianohrl
  */
-public class GrossRequirement {
+@Entity
+public class GrossRequirement implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,10 +40,12 @@ public class GrossRequirement {
         this.unit = unit;
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

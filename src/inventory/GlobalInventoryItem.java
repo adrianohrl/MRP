@@ -1,5 +1,6 @@
 package inventory;
 
+import dao.Referenceable;
 import inventory.mrp.tree.MRPTreeNode;
 import inventory.mrp.tree.ProductComponent;
 import inventory.util.Unit;
@@ -22,7 +23,7 @@ import javax.persistence.OneToOne;
  * @author adrianohrl
  */
 @Entity
-public class GlobalInventoryItem implements Serializable {
+public class GlobalInventoryItem implements Serializable, Referenceable {
     
     @Id
     private String reference;
@@ -214,10 +215,12 @@ public class GlobalInventoryItem implements Serializable {
         return reference;
     }
 
+    @Override
     public String getReference() {
         return reference;
     }
 
+    @Override
     public void setReference(String reference) {
         this.reference = reference;
     }

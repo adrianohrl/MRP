@@ -3,18 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package inventory.orders;
-
-import javax.persistence.Entity;
+package dao;
 
 /**
  *
  * @author adrianohrl
  */
-@Entity
-public class Delivery extends AbstractTransaction {
-
-    public Delivery() {
-    }
+public interface Codeable {
+    
+    public abstract long getCode();
+    
+    public abstract void setCode(long code);
     
 }

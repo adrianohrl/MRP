@@ -2,13 +2,47 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
   <persistence-unit name="mrp_PU" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <class>inventory.ClientInventory</class>
+    <class>inventory.GlobalInventory</class>
+    <class>inventory.GlobalInventoryItem</class>
+    <class>inventory.Inventory</class>
+    <class>inventory.InventoryItem</class>
+    <class>inventory.MachineInventory</class>
+    <class>inventory.ScheduledReceipt</class>
+    <class>inventory.SectorInventory</class>
+    <class>inventory.agents.Agent</class>
+    <class>inventory.agents.Client</class>
+    <class>inventory.agents.Filial</class>
+    <class>inventory.agents.Machine</class>
+    <class>inventory.agents.Responsible</class>
+    <class>inventory.agents.Sector</class>
+    <class>inventory.agents.Supplier</class>
+    <class>inventory.movements.FromSector</class>
+    <class>inventory.movements.FromSectorToClient</class>
+    <class>inventory.movements.FromSectorToSector</class>
+    <class>inventory.movements.FromSupplierToSector</class>
+    <class>inventory.movements.Movement</class>
+    <class>inventory.movements.ToSector</class>
+    <class>inventory.mrp.tree.MRPTreeNode</class>
+    <class>inventory.mrp.tree.Product</class>
+    <class>inventory.mrp.tree.ProductComponent</class>
+    <class>inventory.mrp.tree.ProductItem</class>
+    <class>inventory.mrp.tree.ProductModule</class>
+    <class>inventory.orders.AbstractOrder</class>
+    <class>inventory.orders.AbstractTransaction</class>
+    <class>inventory.orders.Cancellation</class>
+    <class>inventory.orders.Devolution</class>
+    <class>inventory.orders.OrderItem</class>
+    <class>inventory.orders.PurchaseOrder</class>
+    <class>inventory.orders.SaleOrder</class>
+    <class>inventory.util.Unit</class>
+    <class>inventory.GrossRequirement</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/mrp?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="mrp"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
       <property name="javax.persistence.jdbc.password" value="mrp"/>
       <property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider"/>
-      <property name="javax.persistence.schema-generation.database.action" value="create"/>
     </properties>
   </persistence-unit>
 </persistence>

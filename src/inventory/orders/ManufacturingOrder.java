@@ -8,11 +8,13 @@ package inventory.orders;
 import inventory.SectorInventory;
 import inventory.agents.Sector;
 import java.util.Calendar;
+import javax.persistence.Entity;
 
 /**
  *
  * @author adrianohrl
  */
+@Entity
 public class ManufacturingOrder extends AbstractOrder<Sector, Sector> {
 
     public ManufacturingOrder() {

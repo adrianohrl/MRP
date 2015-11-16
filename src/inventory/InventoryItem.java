@@ -5,6 +5,7 @@
  */
 package inventory;
 
+import dao.Codeable;
 import inventory.util.Unit;
 import inventory.util.UnitConverter;
 import java.io.Serializable;
@@ -19,7 +20,7 @@ import javax.persistence.ManyToOne;
  * @author adrianohrl
  */
 @Entity
-public class InventoryItem implements Serializable {
+public class InventoryItem implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -138,10 +139,12 @@ public class InventoryItem implements Serializable {
         return globalItem.toString() + "(on hand: " + quantityOnHand + " [" + unit + "], bound: " + boundQuantity + " [" + unit + "])";
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

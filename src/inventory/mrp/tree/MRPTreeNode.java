@@ -5,6 +5,7 @@
  */
 package inventory.mrp.tree;
 
+import dao.Codeable;
 import inventory.GlobalInventoryItem;
 import inventory.util.Unit;
 import inventory.util.UnitConverter;
@@ -26,7 +27,7 @@ import javax.persistence.OneToMany;
  * @param <C>
  */
 @Entity
-public abstract class MRPTreeNode<C extends ProductComponent> implements Serializable {
+public abstract class MRPTreeNode<C extends ProductComponent> implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -94,10 +95,12 @@ public abstract class MRPTreeNode<C extends ProductComponent> implements Seriali
         return node.toString() + ": " + leadTime + " [" + timeUnit + "]";
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

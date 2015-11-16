@@ -5,6 +5,7 @@
  */
 package inventory.orders;
 
+import dao.Referenceable;
 import inventory.GlobalInventoryItem;
 import inventory.SectorInventory;
 import inventory.agents.Agent;
@@ -33,7 +34,7 @@ import javax.persistence.TemporalType;
  * @param <C>
  */
 @Entity
-public abstract class AbstractOrder<S extends Agent, C extends Agent> implements Serializable {
+public abstract class AbstractOrder<S extends Agent, C extends Agent> implements Serializable, Referenceable {
     
     @Id
     private String reference;
@@ -286,10 +287,12 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
         return str;
     }
 
+    @Override
     public String getReference() {
         return reference;
     }
 
+    @Override
     public void setReference(String reference) {
         this.reference = reference;
     }

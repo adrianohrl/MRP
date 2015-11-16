@@ -3,18 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package inventory.orders;
+package dao.inventory.agents;
 
-import javax.persistence.Entity;
+import inventory.agents.Filial;
+import javax.persistence.EntityManager;
 
 /**
  *
  * @author adrianohrl
  */
-@Entity
-public class Delivery extends AbstractTransaction {
+public class FilialDAO extends AgentDAO<Filial> {
 
-    public Delivery() {
+    public FilialDAO(EntityManager em) {
+        super(em, Filial.class);
     }
     
 }

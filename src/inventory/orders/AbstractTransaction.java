@@ -5,6 +5,7 @@
  */
 package inventory.orders;
 
+import dao.Codeable;
 import inventory.GlobalInventoryItem;
 import inventory.util.Unit;
 import java.io.Serializable;
@@ -27,7 +28,7 @@ import javax.persistence.TemporalType;
  * @author adrianohrl
  */
 @Entity
-public abstract class AbstractTransaction implements Serializable {
+public abstract class AbstractTransaction implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -112,10 +113,12 @@ public abstract class AbstractTransaction implements Serializable {
         return this.getClass().getSimpleName() + " on " + dateFormatter.format(transactionDate.getTime()) + " of " + size() + " items (" + decimalFormatter.format(100 * percentage) + " %)";
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

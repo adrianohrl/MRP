@@ -5,6 +5,7 @@
  */
 package inventory.movements;
 
+import dao.Codeable;
 import inventory.GlobalInventoryItem;
 import inventory.Inventory;
 import inventory.InventoryItem;
@@ -33,7 +34,7 @@ import javax.persistence.TemporalType;
  * @param <D>
  */
 @Entity
-public abstract class Movement<S extends Inventory, D extends Inventory> implements Serializable {
+public abstract class Movement<S extends Inventory, D extends Inventory> implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -45,9 +46,9 @@ public abstract class Movement<S extends Inventory, D extends Inventory> impleme
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar movementDate = new GregorianCalendar();
     private String observation = "";
-    @ManyToOne
+    @ManyToOne(targetEntity = Inventory.class)
     private S source;
-    @ManyToOne
+    @ManyToOne(targetEntity = Inventory.class)
     private D destination;
     @ManyToMany
     private List<InventoryItem> items = new ArrayList<>();
@@ -127,10 +128,12 @@ public abstract class Movement<S extends Inventory, D extends Inventory> impleme
         return "Inventory movement on " + formatter.format(movementDate.getTime()) + " by " + responsible + " from " + source.getAgent() + " to " + destination.getAgent();
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

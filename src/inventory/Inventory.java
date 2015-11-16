@@ -5,11 +5,11 @@
  */
 package inventory;
 
+import dao.Codeable;
 import inventory.agents.Agent;
 import inventory.orders.OrderItem;
 import inventory.mrp.tree.ProductComponent;
 import inventory.orders.AbstractOrder;
-import inventory.orders.ManufacturingOrder;
 import inventory.util.Unit;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import javax.persistence.OneToOne;
  * @param <A>
  */
 @Entity
-public abstract class Inventory<A extends Agent> implements Serializable {
+public abstract class Inventory<A extends Agent> implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -373,10 +373,12 @@ public abstract class Inventory<A extends Agent> implements Serializable {
         return agent + " Inventory (" + items.size() + ")";
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }

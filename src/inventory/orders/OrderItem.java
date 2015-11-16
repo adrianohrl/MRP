@@ -5,6 +5,7 @@
  */
 package inventory.orders;
 
+import dao.Codeable;
 import inventory.GlobalInventoryItem;
 import inventory.util.Unit;
 import inventory.util.UnitConverter;
@@ -20,7 +21,7 @@ import javax.persistence.ManyToOne;
  * @author adrianohrl
  */
 @Entity
-public class OrderItem implements Serializable {
+public class OrderItem implements Serializable, Codeable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -127,10 +128,12 @@ public class OrderItem implements Serializable {
         return item.toString();
     }
 
+    @Override
     public long getCode() {
         return code;
     }
 
+    @Override
     public void setCode(long code) {
         this.code = code;
     }
