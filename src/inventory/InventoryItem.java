@@ -136,7 +136,7 @@ public class InventoryItem implements Serializable, Codeable {
     
     @Override
     public String toString() {
-        return globalItem.toString() + "(on hand: " + quantityOnHand + " [" + unit + "], bound: " + boundQuantity + " [" + unit + "])";
+        return globalItem.toString() + " (on hand: " + quantityOnHand + " [" + unit + "], bound: " + boundQuantity + " [" + unit + "])";
     }
 
     @Override

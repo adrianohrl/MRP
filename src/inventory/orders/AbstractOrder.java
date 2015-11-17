@@ -21,7 +21,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
@@ -45,11 +44,11 @@ public abstract class AbstractOrder<S extends Agent, C extends Agent> implements
     private float deliveryPercentage = 0;
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar deadline = new GregorianCalendar();
-    @ManyToOne
+    @ManyToOne(targetEntity = Agent.class)
     private S supplier;
-    @ManyToOne
+    @ManyToOne(targetEntity = Agent.class)
     private C client;
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Delivery> deliveries = new ArrayList<>();

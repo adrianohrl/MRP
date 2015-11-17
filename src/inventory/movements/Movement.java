@@ -18,12 +18,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -50,7 +51,7 @@ public abstract class Movement<S extends Inventory, D extends Inventory> impleme
     private S source;
     @ManyToOne(targetEntity = Inventory.class)
     private D destination;
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryItem> items = new ArrayList<>();
 
     public Movement() {

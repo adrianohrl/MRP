@@ -7,6 +7,7 @@ package dao.inventory;
 
 import dao.CodeableDAO;
 import inventory.Inventory;
+import inventory.agents.Agent;
 import javax.persistence.EntityManager;
 
 /**
@@ -18,6 +19,17 @@ public abstract class InventoryDAO<I extends Inventory> extends CodeableDAO<I> {
 
     protected InventoryDAO(EntityManager em, Class clazz) {
         super(em, clazz);
+    }
+    
+    public I find(Agent agent) {
+        if (agent == null) {
+            return null;
+        }
+        return find(agent.getName());
+    }
+    
+    public I find(String agentName) {
+        return (I) em.createQuery("FROM Inventory i WHERE i.agent.name = '" + agentName + "'").getSingleResult();
     }
     
 }

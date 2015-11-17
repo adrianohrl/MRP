@@ -15,12 +15,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 /**
@@ -38,7 +39,7 @@ public abstract class Inventory<A extends Agent> implements Serializable, Codeab
     private GlobalInventory globalInventory;
     @OneToOne
     private A agent;
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryItem> items = new ArrayList<>();
 
     public Inventory() {

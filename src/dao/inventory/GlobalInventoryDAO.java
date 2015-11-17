@@ -7,6 +7,7 @@ package dao.inventory;
 
 import dao.CodeableDAO;
 import inventory.GlobalInventory;
+import inventory.agents.Filial;
 import javax.persistence.EntityManager;
 
 /**
@@ -17,6 +18,17 @@ public class GlobalInventoryDAO extends CodeableDAO<GlobalInventory> {
 
     public GlobalInventoryDAO(EntityManager em) {
         super(em, GlobalInventory.class);
+    }
+    
+    public GlobalInventory find(Filial filial) {
+        if (filial == null) {
+            return null;
+        }
+        return find(filial.getName());
+    }
+    
+    public GlobalInventory find(String filialName) {
+        return (GlobalInventory) em.createQuery("FROM GlobalInventory gi WHERE gi.filial.name = '" + filialName + "'").getSingleResult();
     }
     
 }

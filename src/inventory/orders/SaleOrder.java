@@ -20,9 +20,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 
 /**
  *
@@ -31,9 +31,11 @@ import javax.persistence.OneToMany;
 @Entity
 public class SaleOrder extends AbstractOrder<Sector, Client> {
     
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinColumn(insertable = false, updatable = false) 
     private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinColumn(insertable = false, updatable = false) 
     private List<ManufacturingOrder> manufacturingOrders = new ArrayList<>();
 
     public SaleOrder() {
@@ -65,7 +67,13 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
     private void order(OrderItem item) {
         GrossRequirement grossRequirement = new GrossRequirement(this, item.getQuantity(), item.getUnit());
         getInventory().add(grossRequirement, item.getItem());
-        order(item.getItem(), item.getQuantity(), item.getUnit());
+        double remainingQuantity = order(item.getItem(), item.getQuantity(), item.getUnit());
+        GlobalInventoryItem globalItem = item.getItem();
+        Calendar deadline = CalendarManipulator.subtract(getDeadline(), globalItem.getLeadTime(), globalItem.getTimeUnit());
+        String orderName = getReference() + ": " + globalItem.getReference() + " (" + CalendarManipulator.formatDate(deadline) + ")";
+        ManufacturingOrder manufacturingOrder = new ManufacturingOrder(orderName, getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
+        manufacturingOrder.add(new OrderItem(globalItem, remainingQuantity, item.getUnit()));
+        add(manufacturingOrder);
     }
     
     private double order(GlobalInventoryItem item, double quantity, Unit unit) {
@@ -84,14 +92,14 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
                 leadTime += parent.getNode().getLeadTime(child.getTimeUnit());
                 parent = parent.getParent();
             }
+            Calendar deadline = CalendarManipulator.subtract(getDeadline(), leadTime, child.getTimeUnit());
+            String orderName = getReference() + ": " + child.getNode().getReference() + " (" + CalendarManipulator.formatDate(deadline) + ")";
             if (child.isLeaf()) {
-                Calendar deadline = CalendarManipulator.subtract(getDeadline(), leadTime, child.getTimeUnit());
-                PurchaseOrder purchaseOrder = new PurchaseOrder(getReference(), getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
+                PurchaseOrder purchaseOrder = new PurchaseOrder(orderName, getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
                 purchaseOrder.add(new OrderItem(child.getNode(), childRemainingQuantity, child.getQuantityUnit()));
                 add(purchaseOrder);
             } else if (remainingQuantity != 0) {
-                Calendar deadline = CalendarManipulator.subtract(getDeadline(), leadTime, child.getTimeUnit());
-                ManufacturingOrder manufacturingOrder = new ManufacturingOrder(getReference(), getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
+                ManufacturingOrder manufacturingOrder = new ManufacturingOrder(orderName, getInventory(), new GregorianCalendar(), deadline, null, getSupplier());
                 manufacturingOrder.add(new OrderItem(child.getNode(), childRemainingQuantity, unit));
                 add(manufacturingOrder);
             }
@@ -110,6 +118,9 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
     }
     
     private void add(PurchaseOrder order) {
+        if (order == null) {
+            return;
+        }
         for (int i = order.size() - 1; i >= 0; i--) {
             OrderItem item = order.getItems().get(i);
             GlobalInventoryItem globalItem = item.getItem();
@@ -150,6 +161,9 @@ public class SaleOrder extends AbstractOrder<Sector, Client> {
     }
     
     private void add(ManufacturingOrder order) {
+        if (order == null) {
+            return;
+        }
         for (int i = order.size() - 1; i >= 0; i--) {
             OrderItem item = order.getItems().get(i);
             GlobalInventoryItem globalItem = item.getItem();
