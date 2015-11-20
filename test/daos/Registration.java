@@ -53,8 +53,8 @@ public class Registration {
         Registration.hasAlreadyRegisteredBefore = Registration.registerInventoryItems(em);
         if (!Registration.hasAlreadyRegisteredBefore) {
             Registration.registerInventoryInitialState(em);
+            Registration.registerOrders(em);
         }
-        Registration.registerOrders(em);
         GlobalInventoryDAO globalDAO = new GlobalInventoryDAO(em);
         System.out.println(globalDAO.find("Fábrica em Jacutinga-MG"));
         em.close();
@@ -282,10 +282,10 @@ public class Registration {
         ClientDAO clientDAO = new ClientDAO(em);
         Client renner = clientDAO.find("Renner");
         Unit unidades = new Unit("un", "Unidades", false);
-        SaleOrderDAO saleOrderDAO = new SaleOrderDAO(em);
         SaleOrder saleOrder = new SaleOrder("Fest Malhas 2015", estoqueMP, new GregorianCalendar(), new GregorianCalendar(2016, Calendar.MAY, 1), estoqueMP.getAgent(), renner);
         saleOrder.getItems().add(new OrderItem(blusaAzulP, 100, unidades));
         saleOrder.order();
+        SaleOrderDAO saleOrderDAO = new SaleOrderDAO(em);
         saleOrderDAO.create(saleOrder);
     }
     

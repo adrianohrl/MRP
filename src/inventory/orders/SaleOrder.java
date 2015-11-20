@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
 /**
@@ -32,10 +33,10 @@ import javax.persistence.ManyToMany;
 public class SaleOrder extends AbstractOrder<Sector, Client> {
     
     @ManyToMany
-    @JoinColumn(insertable = false, updatable = false) 
+    @JoinTable(name = "SaleOrder_PurchaseOrder", joinColumns = @JoinColumn(name = "SaleOrder_reference"), inverseJoinColumns = @JoinColumn(name = "purchaseOrders_reference"))
     private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
     @ManyToMany
-    @JoinColumn(insertable = false, updatable = false) 
+    @JoinTable(name = "SaleOrder_ManufacturingOrder", joinColumns = @JoinColumn(name = "SaleOrder_reference"), inverseJoinColumns = @JoinColumn(name = "manufacturingOrders_reference"))
     private List<ManufacturingOrder> manufacturingOrders = new ArrayList<>();
 
     public SaleOrder() {
